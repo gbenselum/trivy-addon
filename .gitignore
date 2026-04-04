@@ -1,0 +1,5 @@
+# Trivy Addon Git Ignore
+reports/
+*.log
+.DS_Store
+node_modules/

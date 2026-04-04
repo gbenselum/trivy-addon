@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html class="pf-v5-theme-dark pf-m-redhat-font">
+<head>
+    <title>Trivy Security Scans</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="../base1/cockpit.js"></script>
+    <link rel="stylesheet" type="text/css" href="../base1/cockpit.css">
+    <link rel="stylesheet" type="text/css" href="index.css">
+</head>
+<body class="pf-v5-c-page">
+    <div class="addon-container">
+        <!-- HEADER -->
+        <header class="addon-header">
+            <h2 style="margin:0; font-size: 18px; font-weight: 400;">
+                <i class="pf-v5-pficon pf-v5-pficon-security" style="color: var(--primary); margin-right: 18px;"></i>
+                Trivy Vulnerability Scanner
+            </h2>
+            <div class="header-right">
+                <span id="status-label" style="font-size: 13px; color: var(--text-muted); margin-right: 20px;">System Idle</span>
+                <button id="btn-logs" class="btn-custom btn-secondary-custom pf-v5-c-button pf-m-secondary" type="button">Logs</button>
+                <button id="btn-run" class="btn-custom btn-primary-custom pf-v5-c-button pf-m-primary" type="button">Run Full Scan</button>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT AREA (Overview Style) -->
+        <div class="addon-main">
+            <!-- Full Width Content Viewport -->
+            <main class="addon-content pf-v5-c-page__main">
+                
+                <!-- Summary / Traffic Light Grid (PatternFly Discovery Style) -->
+                <div id="dashboard-summary" class="pf-v5-l-gallery pf-m-gutter" style="display:none; padding: 24px;">
+                    <div class="pf-v5-c-card stat-card-native critical">
+                        <div class="pf-v5-c-card__title stat-label">Critical</div>
+                        <div id="count-critical" class="pf-v5-c-card__body stat-value">0</div>
+                    </div>
+                    <div class="pf-v5-c-card stat-card-native high">
+                        <div class="pf-v5-c-card__title stat-label">High</div>
+                        <div id="count-high" class="pf-v5-c-card__body stat-value">0</div>
+                    </div>
+                    <div class="pf-v5-c-card stat-card-native medium">
+                        <div class="pf-v5-c-card__title stat-label">Medium</div>
+                        <div id="count-medium" class="pf-v5-c-card__body stat-value">0</div>
+                    </div>
+                    <div class="pf-v5-c-card stat-card-native low">
+                        <div class="pf-v5-c-card__title stat-label">Low</div>
+                        <div id="count-low" class="pf-v5-c-card__body stat-value">0</div>
+                    </div>
+                    <div class="pf-v5-c-card stat-card-native unknown">
+                        <div class="pf-v5-c-card__title stat-label">Unknown</div>
+                        <div id="count-unknown" class="pf-v5-c-card__body stat-value">0</div>
+                    </div>
+                </div>
+
+                <div id="empty-state" style="padding: 60px; text-align: center; color: #666; background: var(--bg-dark); height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <i class="pf-v5-fas pf-v5-fa-shield-alt" style="font-size: 64px; margin-bottom: 24px; opacity: 0.1;"></i>
+                    <h3 style="color: #999; font-weight: 300;">No Scan Selected</h3>
+                    <p style="font-size: 14px; color: #555;">Select a scan from the sidebar or click "Run Full Scan".</p>
+                </div>
+
+                <!-- Native Dashboard Container -->
+                <div id="dashboard-results" class="dashboard-results" style="display:none;"></div>
+            </main>
+        </div>
+    </div>
+
+    <!-- LOG TERMINAL PANEL -->
+    <div id="log-panel">
+        <div class="log-header">
+            <span style="font-size: 11px; font-weight: 600; opacity: 0.7;">SCANNER SYSTEM OUTPUT</span>
+            <button id="btn-close-logs" class="close-btn" type="button" aria-label="Close logs">&times;</button>
+        </div>
+        <div id="log-output"></div>
+    </div>
+
+    <!-- Addon Logic -->
+    <script src="index.js"></script>
+</body>
+</html>

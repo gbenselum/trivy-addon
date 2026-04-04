@@ -1,0 +1,15 @@
+{
+    "version": "1.0",
+    "display": {
+        "label": "Trivy Scanner",
+        "icon": "security-symbolic"
+    },
+    "menu": {
+        "trivy-view": {
+            "path": "index.html",
+            "label": "Security Scans",
+            "order": 10
+        }
+    },
+    "external": true
+}
