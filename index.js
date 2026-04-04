@@ -29,12 +29,13 @@ function updateReportList() {
 
     return cockpit.script(`ls -1 ${absReports} 2>/dev/null`)
         .then(content => {
-            const files = content.trim().split('\n').filter(f => f.startsWith('scan_'));
+            const files = content.trim().split('\n').filter(f => f.startsWith('scan_') || f.startsWith('fast_scan_'));
             sel.innerHTML = '<option value="">Load History...</option>';
-            files.forEach(filename => {
+            files.sort().reverse().forEach(filename => {
+                const isFast = filename.startsWith('fast_scan_');
                 const opt = document.createElement('option');
                 opt.value = filename;
-                opt.textContent = filename;
+                opt.textContent = `${isFast ? '[FAST]' : '[FULL]'} ${filename}`;
                 sel.appendChild(opt);
             });
         })
@@ -119,7 +120,9 @@ function renderDashboard(data) {
         getEl('count-medium').textContent = counts.MEDIUM;
         getEl('count-low').textContent = counts.LOW;
         getEl('count-unknown').textContent = counts.UNKNOWN;
-        getEl('dashboard-results').innerHTML = html || '<div style="text-align:center; padding:40px; color:#555;">No vulnerabilities found. Perfect!</div>';
+        
+        const typeStr = activeFilter ? ` <b>${activeFilter.toLowerCase()}</b>` : '';
+        getEl('dashboard-results').innerHTML = html || `<div style="text-align:center; padding:40px; color:#555;">No vulnerabilities${typeStr} found. Perfect!</div>`;
     } catch (e) { console.error("Render crashed:", e); }
 }
 
@@ -130,27 +133,30 @@ function renderLegacyReport(filename) {
     getEl('dashboard-results').innerHTML = `<div style="padding:40px; text-align:center;"><h3 style="color:#eee;">Legacy Report: ${filename}</h3></div>`;
 }
 
-function runScan() {
+function runSystemScan(isFast = false) {
     if (isRunning || !absRoot) return;
     isRunning = true;
-    getEl('btn-run').disabled = true;
-    getEl('status-label').innerHTML = '<span class="spinner">&circlearrowright;</span> Scanning...';
+    const btn = isFast ? getEl('btn-fast-run') : getEl('btn-run');
+    btn.disabled = true;
+    getEl('status-label').innerHTML = `<span class="spinner">&circlearrowright;</span> ${isFast ? 'Fast Scanning...' : 'Full Scanning...'}`;
     getEl('log-panel').classList.add('expanded');
-    cockpit.spawn(["/usr/bin/bash", absRoot + "/scan_system.sh"], { superuser: "require", err: "out" })
+    
+    const script = isFast ? "/fast_scan_system.sh" : "/scan_system.sh";
+    cockpit.spawn(["/usr/bin/bash", absRoot + script], { superuser: "require", err: "out" })
         .stream(data => {
             const out = getEl('log-output');
             if (out) { out.textContent += data; out.scrollTop = out.scrollHeight; }
         })
         .done(() => {
             isRunning = false;
-            getEl('btn-run').disabled = false;
+            btn.disabled = false;
             getEl('status-label').textContent = "Last Scan: Success";
             updateReportList();
             showReport('latest_results.json');
         })
         .fail(() => {
             isRunning = false;
-            getEl('btn-run').disabled = false;
+            btn.disabled = false;
             getEl('status-label').textContent = "Scan Failed";
         });
 }
@@ -158,7 +164,8 @@ function runScan() {
 function init() {
     if (initialized) return;
     initialized = true;
-    getEl('btn-run').addEventListener('click', runScan);
+    getEl('btn-run').addEventListener('click', () => runSystemScan(false));
+    getEl('btn-fast-run').addEventListener('click', () => runSystemScan(true));
     getEl('btn-logs').addEventListener('click', () => getEl('log-panel').classList.toggle('expanded'));
     getEl('btn-close-logs').addEventListener('click', () => getEl('log-panel').classList.remove('expanded'));
     const sel = getEl('report-selector');
