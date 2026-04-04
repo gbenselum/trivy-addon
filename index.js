@@ -62,6 +62,27 @@ function setFilter(severity) {
     if (currentData) renderDashboard(currentData);
 }
 
+function getFixCommand(v, dsName) {
+    if (!v.FixedVersion) return "Manual review required";
+    
+    const pkg = v.PkgName;
+    const ver = v.FixedVersion;
+    const ds = (dsName || '').toLowerCase();
+
+    if (ds.includes('debian') || ds.includes('ubuntu') || ds.includes('apt')) 
+        return `sudo apt install ${pkg}=${ver}`;
+    if (ds.includes('redhat') || ds.includes('alma') || ds.includes('dnf') || ds.includes('yum')) 
+        return `sudo dnf update ${pkg}-${ver}`;
+    if (ds.includes('npm')) 
+        return `npm install ${pkg}@${ver}`;
+    if (ds.includes('pypi') || ds.includes('python')) 
+        return `pip install ${pkg}==${ver}`;
+    if (ds.includes('rubygems')) 
+        return `gem install ${pkg}:${ver}`;
+    
+    return `Update ${pkg} to ${ver}`;
+}
+
 function renderDashboard(data) {
     try {
         getEl('empty-state').style.display = 'none';
@@ -73,6 +94,9 @@ function renderDashboard(data) {
 
         if (data.Results) {
             data.Results.forEach(target => {
+                const dsName = (target.Vulnerabilities && target.Vulnerabilities[0] && target.Vulnerabilities[0].DataSource) 
+                               ? target.Vulnerabilities[0].DataSource.Name : "Generic";
+
                 if (target.Vulnerabilities) {
                     target.Vulnerabilities.forEach(v => {
                         const sev = (v.Severity || 'UNKNOWN').toUpperCase();
@@ -81,6 +105,8 @@ function renderDashboard(data) {
 
                         // Apply filter
                         if (activeFilter && activeFilter !== sev) return;
+
+                        const fixCmd = getFixCommand(v, dsName);
 
                         html += `
                             <div class="vuln-item">
@@ -94,8 +120,8 @@ function renderDashboard(data) {
                                 </div>
                                 <div class="vuln-desc-text">${v.Title || 'No description available.'}</div>
                                 <div class="remediation-box">
-                                    <div class="remediation-label">Remediation / Fix</div>
-                                    <div class="remediation-cmd">${v.FixedVersion ? 'Update to version ' + v.FixedVersion : 'Manual check required'}</div>
+                                    <div class="remediation-label">Remediation / Fix Command</div>
+                                    <div class="remediation-cmd">${fixCmd}</div>
                                 </div>
                             </div>
                         `;
