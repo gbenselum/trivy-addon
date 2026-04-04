@@ -7,6 +7,8 @@ let REPORT_DIR_ABS = null;
 let scanPathAbs = null;
 let isRunning = false;
 let initialized = false;
+let currentData = null; // Store last loaded scan for instant filtering
+let activeFilter = null; // current severity filter
 
 const getEl = (id) => document.getElementById(id);
 
@@ -38,15 +40,26 @@ function showReport(filename) {
         .then(content => {
             if (!content) return;
             if (filename.endsWith('.json')) {
-                renderDashboard(JSON.parse(content));
+                currentData = JSON.parse(content);
+                activeFilter = null; // Reset filter on new report
+                renderDashboard(currentData);
             } else {
                 renderLegacyReport(filename);
             }
-            document.querySelectorAll('.report-link').forEach(el => {
-                el.classList.toggle('active', el.innerText.includes(parseScanDate(filename)));
-            });
         })
         .catch(err => console.error("Load failed:", err));
+}
+
+function setFilter(severity) {
+    if (activeFilter === severity) activeFilter = null; // Toggle off
+    else activeFilter = severity;
+    
+    // Update UI highlights
+    ['critical', 'high', 'medium', 'low', 'unknown'].forEach(s => {
+        getEl(`card-${s}`).classList.toggle('active-filter', activeFilter === s.toUpperCase());
+    });
+
+    if (currentData) renderDashboard(currentData);
 }
 
 function renderDashboard(data) {
@@ -65,6 +78,9 @@ function renderDashboard(data) {
                         const sev = (v.Severity || 'UNKNOWN').toUpperCase();
                         if (counts.hasOwnProperty(sev)) counts[sev]++;
                         else counts.UNKNOWN++;
+
+                        // Apply filter
+                        if (activeFilter && activeFilter !== sev) return;
 
                         html += `
                             <div class="vuln-item">
@@ -140,6 +156,12 @@ function init() {
     getEl('btn-run').addEventListener('click', runScan);
     getEl('btn-logs').addEventListener('click', () => getEl('log-panel').classList.toggle('expanded'));
     getEl('btn-close-logs').addEventListener('click', () => getEl('log-panel').classList.remove('expanded'));
+
+    // Filtering Listeners
+    ['critical', 'high', 'medium', 'low', 'unknown'].forEach(sev => {
+        const card = getEl(`card-${sev}`);
+        if (card) card.onclick = () => setFilter(sev.toUpperCase());
+    });
 
     discoverPaths().then(() => {
         // Sidebar removed, just load latest

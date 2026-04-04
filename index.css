@@ -51,7 +51,17 @@ html, body {
 .dashboard-summary { display: flex; gap: 12px; padding: 16px; background: rgba(0,0,0,0.2); }
 .stat-card-native {
     background: var(--bg-sidebar) !important;
+    cursor: pointer;
+    transition: transform 0.1s, border-color 0.1s;
+    border: 1px solid transparent !important;
 }
+.stat-card-native:hover { transform: translateY(-2px); border-color: #666 !important; }
+.stat-card-native.active-filter { 
+    outline: 2px solid var(--primary); 
+    outline-offset: -2px;
+    background: rgba(0, 102, 204, 0.1) !important;
+}
+
 .stat-card-native.critical { border-top: 4px solid #dc2626 !important; }
 .stat-card-native.high { border-top: 4px solid #ea580c !important; }
 .stat-card-native.medium { border-top: 4px solid #f59e0b !important; }
