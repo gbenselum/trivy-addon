@@ -3,111 +3,96 @@
    Restored to external file for CSP compliance.
 */
 
-let REPORT_DIR_ABS = null; 
-let scanPathAbs = null;
 let isRunning = false;
 let initialized = false;
-let currentData = null; // Store last loaded scan for instant filtering
-let activeFilter = null; // current severity filter
+let currentData = null; 
+let activeFilter = null; 
+let absRoot = ""; 
+let absReports = ""; 
 
 const getEl = (id) => document.getElementById(id);
-
-function parseScanDate(filename) {
-    const match = filename.match(/scan_(\d{4})-(\d{2})-(\d{2})_(\d{2})-(\d{2})/);
-    return match ? `${match[1]}-${match[2]}-${match[3]} ${match[4]}:${match[5]}` : filename;
-}
 
 function discoverPaths() {
     return cockpit.script("find /usr/share/cockpit ~/.local/share/cockpit -maxdepth 2 -name scan_system.sh -print -quit 2>/dev/null")
         .then(path => {
             const fullPath = path.trim();
-            if (!fullPath) throw new Error("Addon directory not found");
-            scanPathAbs = fullPath;
-            REPORT_DIR_ABS = fullPath.substring(0, fullPath.lastIndexOf('/')) + "/reports";
-            console.log("Addon Root discovered:", REPORT_DIR_ABS);
-            return REPORT_DIR_ABS;
+            if (!fullPath) return; // Fallback
+            absRoot = fullPath.substring(0, fullPath.lastIndexOf('/'));
+            absReports = absRoot + "/reports";
+            console.log("Absolute paths discovered:", absRoot);
         });
 }
 
 function updateReportList() {
-    // Sidebar removed in Native Overview layout
-    return;
+    const sel = getEl('report-selector');
+    if (!sel || !absReports) return;
+
+    return cockpit.script(`ls -1 ${absReports} 2>/dev/null`)
+        .then(content => {
+            const files = content.trim().split('\n').filter(f => f.startsWith('scan_'));
+            sel.innerHTML = '<option value="">Load History...</option>';
+            files.forEach(filename => {
+                const opt = document.createElement('option');
+                opt.value = filename;
+                opt.textContent = filename;
+                sel.appendChild(opt);
+            });
+        })
+        .catch(err => console.error("Dropdown failed:", err));
 }
 
 function showReport(filename) {
-    if (!REPORT_DIR_ABS) return;
-    return cockpit.file(`${REPORT_DIR_ABS}/${filename}`).read()
+    if (!filename || !absReports) return;
+    return cockpit.file(`${absReports}/${filename}`).read()
         .then(content => {
             if (!content) return;
-            if (filename.endsWith('.json')) {
-                currentData = JSON.parse(content);
-                activeFilter = null; // Reset filter on new report
-                renderDashboard(currentData);
-            } else {
-                renderLegacyReport(filename);
-            }
+            currentData = JSON.parse(content);
+            activeFilter = null; 
+            renderDashboard(currentData);
         })
         .catch(err => console.error("Load failed:", err));
 }
 
 function setFilter(severity) {
-    if (activeFilter === severity) activeFilter = null; // Toggle off
+    if (activeFilter === severity) activeFilter = null;
     else activeFilter = severity;
-    
-    // Update UI highlights
     ['critical', 'high', 'medium', 'low', 'unknown'].forEach(s => {
         getEl(`card-${s}`).classList.toggle('active-filter', activeFilter === s.toUpperCase());
     });
-
     if (currentData) renderDashboard(currentData);
 }
 
 function getFixCommand(v, dsName) {
     if (!v.FixedVersion) return "Manual review required";
-    
     const pkg = v.PkgName;
     const ver = v.FixedVersion;
     const ds = (dsName || '').toLowerCase();
-
-    if (ds.includes('debian') || ds.includes('ubuntu') || ds.includes('apt')) 
-        return `sudo apt install ${pkg}=${ver}`;
-    if (ds.includes('redhat') || ds.includes('alma') || ds.includes('dnf') || ds.includes('yum')) 
-        return `sudo dnf update ${pkg}-${ver}`;
-    if (ds.includes('npm')) 
-        return `npm install ${pkg}@${ver}`;
-    if (ds.includes('pypi') || ds.includes('python')) 
-        return `pip install ${pkg}==${ver}`;
-    if (ds.includes('rubygems')) 
-        return `gem install ${pkg}:${ver}`;
-    
+    if (ds.includes('debian') || ds.includes('ubuntu') || ds.includes('apt')) return `sudo apt install ${pkg}=${ver}`;
+    if (ds.includes('redhat') || ds.includes('alma') || ds.includes('dnf') || ds.includes('yum')) return `sudo dnf update ${pkg}-${ver}`;
+    if (ds.includes('npm')) return `npm install ${pkg}@${ver}`;
+    if (ds.includes('pypi') || ds.includes('python')) return `pip install ${pkg}==${ver}`;
+    if (ds.includes('rubygems')) return `gem install ${pkg}:${ver}`;
     return `Update ${pkg} to ${ver}`;
 }
 
 function renderDashboard(data) {
     try {
         getEl('empty-state').style.display = 'none';
-        getEl('dashboard-summary').style.display = 'flex';
+        getEl('dashboard-summary').style.display = 'grid'; // Force grid
         getEl('dashboard-results').style.display = 'block';
-        
         let counts = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0, UNKNOWN: 0 };
         let html = '';
-
         if (data.Results) {
             data.Results.forEach(target => {
                 const dsName = (target.Vulnerabilities && target.Vulnerabilities[0] && target.Vulnerabilities[0].DataSource) 
                                ? target.Vulnerabilities[0].DataSource.Name : "Generic";
-
                 if (target.Vulnerabilities) {
                     target.Vulnerabilities.forEach(v => {
                         const sev = (v.Severity || 'UNKNOWN').toUpperCase();
                         if (counts.hasOwnProperty(sev)) counts[sev]++;
                         else counts.UNKNOWN++;
-
-                        // Apply filter
                         if (activeFilter && activeFilter !== sev) return;
-
                         const fixCmd = getFixCommand(v, dsName);
-
                         html += `
                             <div class="vuln-item">
                                 <div class="vuln-header-row">
@@ -129,17 +114,13 @@ function renderDashboard(data) {
                 }
             });
         }
-
         getEl('count-critical').textContent = counts.CRITICAL;
         getEl('count-high').textContent = counts.HIGH;
         getEl('count-medium').textContent = counts.MEDIUM;
         getEl('count-low').textContent = counts.LOW;
         getEl('count-unknown').textContent = counts.UNKNOWN;
-        
         getEl('dashboard-results').innerHTML = html || '<div style="text-align:center; padding:40px; color:#555;">No vulnerabilities found. Perfect!</div>';
-    } catch (e) {
-        console.error("Render crashed:", e);
-    }
+    } catch (e) { console.error("Render crashed:", e); }
 }
 
 function renderLegacyReport(filename) {
@@ -150,13 +131,12 @@ function renderLegacyReport(filename) {
 }
 
 function runScan() {
-    if (isRunning || !scanPathAbs) return;
+    if (isRunning || !absRoot) return;
     isRunning = true;
     getEl('btn-run').disabled = true;
     getEl('status-label').innerHTML = '<span class="spinner">&circlearrowright;</span> Scanning...';
     getEl('log-panel').classList.add('expanded');
-    
-    cockpit.spawn(["/usr/bin/bash", scanPathAbs], { superuser: "require", err: "out" })
+    cockpit.spawn(["/usr/bin/bash", absRoot + "/scan_system.sh"], { superuser: "require", err: "out" })
         .stream(data => {
             const out = getEl('log-output');
             if (out) { out.textContent += data; out.scrollTop = out.scrollHeight; }
@@ -168,7 +148,7 @@ function runScan() {
             updateReportList();
             showReport('latest_results.json');
         })
-        .fail(err => {
+        .fail(() => {
             isRunning = false;
             getEl('btn-run').disabled = false;
             getEl('status-label').textContent = "Scan Failed";
@@ -178,22 +158,20 @@ function runScan() {
 function init() {
     if (initialized) return;
     initialized = true;
-
     getEl('btn-run').addEventListener('click', runScan);
     getEl('btn-logs').addEventListener('click', () => getEl('log-panel').classList.toggle('expanded'));
     getEl('btn-close-logs').addEventListener('click', () => getEl('log-panel').classList.remove('expanded'));
-
-    // Filtering Listeners
+    const sel = getEl('report-selector');
+    if (sel) sel.onchange = (e) => { if (e.target.value) showReport(e.target.value); };
     ['critical', 'high', 'medium', 'low', 'unknown'].forEach(sev => {
         const card = getEl(`card-${sev}`);
         if (card) card.onclick = () => setFilter(sev.toUpperCase());
     });
-
+    
     discoverPaths().then(() => {
-        // Sidebar removed, just load latest
+        updateReportList();
         showReport('latest_results.json').catch(() => {});
-    }).catch(err => console.error("Init Error:", err));
+    }).catch(err => console.error("Discovery Error:", err));
 }
 
-// Cockpit standard onready
 cockpit.transport.wait(init);

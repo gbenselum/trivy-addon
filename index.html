@@ -16,7 +16,10 @@
                 <i class="pf-v5-pficon pf-v5-pficon-security" style="color: var(--primary); margin-right: 18px;"></i>
                 Trivy Vulnerability Scanner
             </h2>
-            <div class="header-right">
+            <div class="header-right" style="display: flex; align-items: center;">
+                <select id="report-selector" class="pf-v5-c-form-control pf-m-search" style="width: auto; max-width: 220px; margin-right: 15px; background: rgba(0,0,0,0.2); color: #ccc; border-color: #444; font-size: 13px;">
+                    <option value="">Load History...</option>
+                </select>
                 <span id="status-label" style="font-size: 13px; color: var(--text-muted); margin-right: 20px;">System Idle</span>
                 <button id="btn-logs" class="btn-custom btn-secondary-custom pf-v5-c-button pf-m-secondary" type="button">Logs</button>
                 <button id="btn-run" class="btn-custom btn-primary-custom pf-v5-c-button pf-m-primary" type="button">Run Full Scan</button>

@@ -48,12 +48,23 @@ html, body {
 .btn-custom:hover { opacity: 0.8; }
 
 /* Dashboard Cards */
-.dashboard-summary { display: flex; gap: 12px; padding: 16px; background: rgba(0,0,0,0.2); }
+#dashboard-summary {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    padding: 24px;
+    background: rgba(0,0,0,0.2);
+}
+
 .stat-card-native {
     background: var(--bg-sidebar) !important;
     cursor: pointer;
     transition: transform 0.1s, border-color 0.1s;
     border: 1px solid transparent !important;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 .stat-card-native:hover { transform: translateY(-2px); border-color: #666 !important; }
 .stat-card-native.active-filter { 
