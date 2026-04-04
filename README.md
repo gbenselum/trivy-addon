@@ -59,5 +59,14 @@ Ensure the following packages are installed on your host:
 The addon requires `superuser` permissions to perform the file system scan. It communicates with the host via the standard Cockpit bridge (`cockpit.js`). All reports are stored locally within the addon's `reports/` folder for maximum portability and security.
 
 ---
+## 🏆 Attribution & Derivative Work
+This project is an independent extension of the **[Cockpit Project](https://cockpit-project.org/)**. It leverages the following technologies and standards:
+- **Cockpit Native Bridge**: For secure, high-performance communication with the host filesystem.
+- **PatternFly 5**: The design system that provides the addon's professional and integrated look.
+- **Trivy by [Aqua Security](https://aquasecurity.github.io/trivy/)**: The core scanning engine that powers the vulnerability audits.
+- **Antigravity AI (Google Deepmind)**: The engineering assistant that participated in the architecture and development of this V3 release.
+
+---
 **Maintained by**: Gabriel  
-**Engineered with**: Antigravity AI
+**Engineered with**: Antigravity AI  
+**License**: [LGPL-2.1](file:///home/gabriel/.local/share/cockpit/trivy-addon/LICENSE)
