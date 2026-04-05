@@ -12,6 +12,17 @@ let absReports = "";
 
 const getEl = (id) => document.getElementById(id);
 
+// Secure HTML escaping for dynamic content
+function escapeHTML(str) {
+    if (!str) return "";
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 function discoverPaths() {
     return cockpit.script("find /usr/share/cockpit ~/.local/share/cockpit -maxdepth 2 -name scan_system.sh -print -quit 2>/dev/null")
         .then(path => {
@@ -98,16 +109,16 @@ function renderDashboard(data) {
                             <div class="vuln-item">
                                 <div class="vuln-header-row">
                                     <div>
-                                        <span class="vuln-badge badge-${sev.toLowerCase()}">${sev}</span>
-                                        <div class="vuln-pkg">${v.PkgName}</div>
-                                        <div class="vuln-id" style="font-size:11px; color:var(--text-muted); font-family:monospace;">${v.VulnerabilityID}</div>
+                                        <span class="vuln-badge badge-${escapeHTML(sev.toLowerCase())}">${escapeHTML(sev)}</span>
+                                        <div class="vuln-pkg">${escapeHTML(v.PkgName)}</div>
+                                        <div class="vuln-id" style="font-size:11px; color:var(--text-muted); font-family:monospace;">${escapeHTML(v.VulnerabilityID)}</div>
                                     </div>
-                                    <div style="font-size:12px; color:var(--text-muted)">Installed: ${v.InstalledVersion}</div>
+                                    <div style="font-size:12px; color:var(--text-muted)">Installed: ${escapeHTML(v.InstalledVersion)}</div>
                                 </div>
-                                <div class="vuln-desc-text">${v.Title || 'No description available.'}</div>
+                                <div class="vuln-desc-text">${escapeHTML(v.Title || 'No description available.')}</div>
                                 <div class="remediation-box">
                                     <div class="remediation-label">Remediation / Fix Command</div>
-                                    <div class="remediation-cmd">${fixCmd}</div>
+                                    <div class="remediation-cmd">${escapeHTML(fixCmd)}</div>
                                 </div>
                             </div>
                         `;
@@ -121,8 +132,12 @@ function renderDashboard(data) {
         getEl('count-low').textContent = counts.LOW;
         getEl('count-unknown').textContent = counts.UNKNOWN;
         
-        const typeStr = activeFilter ? ` <b>${activeFilter.toLowerCase()}</b>` : '';
-        getEl('dashboard-results').innerHTML = html || `<div style="text-align:center; padding:40px; color:#555;">No vulnerabilities${typeStr} found. Perfect!</div>`;
+        if (html) {
+            getEl('dashboard-results').innerHTML = html;
+        } else {
+            const typeStr = activeFilter ? ` ${escapeHTML(activeFilter.toLowerCase())}` : '';
+            getEl('dashboard-results').innerHTML = `<div style="text-align:center; padding:40px; color:#555;">No vulnerabilities${typeStr} found. Perfect!</div>`;
+        }
     } catch (e) { console.error("Render crashed:", e); }
 }
 
