@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 # --- CONFIGURATION ---
 # Script-local storage instead of /var/lib for better portability
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -27,6 +29,7 @@ echo "[+] Destination: $REPORT_FILE"
 echo "[+] Starting Trivy Engine (Estimated time: up to 30 minutes)..."
 
 # Note: We now output JSON so the UI can render it natively.
+# Use --no-progress to reduce log noise
 sudo trivy fs \
   --severity HIGH,CRITICAL \
   --format json \
@@ -34,19 +37,17 @@ sudo trivy fs \
   --skip-dirs "/home/gabriel/.local/share/flatpak" \
   --skip-dirs "/home/gabriel/.local/share/ollama" \
   --timeout 30m \
+  --no-progress \
   /
 
 # --- FINALIZING ---
-if [ $? -eq 0 ]; then
-    echo "[SUCCESS] Scan finished successfully."
-    chmod 644 "$REPORT_FILE"
-    # Create the 'latest' symlink (ending in .json for the UI to fetch)
-    ln -sf "$REPORT_FILE" "${REPORT_DIR}/latest_results.json"
-    chmod 644 "${REPORT_DIR}/latest_results.json"
-    echo "[+] Report generated: $(basename "$REPORT_FILE")"
-else
-    echo "[ERROR] Trivy encountered an issue during the scan."
-    exit 1
-fi
+# Since set -e is used, we only reach here if trivy succeeded or we handle errors
+echo "[SUCCESS] Scan finished successfully."
+chmod 644 "$REPORT_FILE"
+# Create the 'latest' symlink (ending in .json for the UI to fetch)
+# Use -f to overwrite existing symlink safely
+ln -sf "$REPORT_FILE" "${REPORT_DIR}/latest_results.json"
+chmod 644 "${REPORT_DIR}/latest_results.json"
+echo "[+] Report generated: $(basename "$REPORT_FILE")"
 
 echo "--- SCAN FINISHED AT $(date) ---"
