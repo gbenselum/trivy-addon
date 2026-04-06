@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # --- CONFIGURATION ---
 # Script-local storage instead of /var/lib for better portability
@@ -27,17 +28,14 @@ echo "[+] Destination: $REPORT_FILE"
 echo "[+] Starting Trivy Engine (Estimated time: up to 30 minutes)..."
 
 # Note: We now output JSON so the UI can render it natively.
-sudo trivy fs \
+if sudo trivy fs \
   --severity HIGH,CRITICAL \
   --format json \
   --output "$REPORT_FILE" \
   --skip-dirs "/home/gabriel/.local/share/flatpak" \
   --skip-dirs "/home/gabriel/.local/share/ollama" \
   --timeout 30m \
-  /
-
-# --- FINALIZING ---
-if [ $? -eq 0 ]; then
+  /; then
     echo "[SUCCESS] Scan finished successfully."
     chmod 644 "$REPORT_FILE"
     # Create the 'latest' symlink (ending in .json for the UI to fetch)

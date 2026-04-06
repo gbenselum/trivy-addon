@@ -1,0 +1,5 @@
+# Snyk (https://snyk.io) policy file, provides ability to ignore scan results and patch vulnerabilities.
+# For more info: https://docs.snyk.io/snyk-cli/commands/policy
+version: v1.25.0
+ignore: {}
+patch: {}
