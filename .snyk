@@ -1,0 +1,4 @@
+# Snyk (https://snyk.io) policy file, provides ability to ignore vulnerabilities for a package or file.
+version: v1.25.0
+ignore: {}
+patch: {}
