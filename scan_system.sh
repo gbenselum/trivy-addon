@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # --- CONFIGURATION ---
 # Script-local storage instead of /var/lib for better portability
