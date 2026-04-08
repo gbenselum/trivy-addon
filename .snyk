@@ -1,0 +1,4 @@
+# Snyk policy file, see https://snyk.io/docs/snyk-policy-for-ignoring-vulnerabilities-and-patching/
+version: v1.19.0
+ignore: {}
+patch: {}

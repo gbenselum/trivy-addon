@@ -11,5 +11,6 @@
             "order": 10
         }
     },
-    "external": true
+    "external": true,
+    "superuser": "require"
 }
