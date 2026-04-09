@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # --- CONFIGURATION ---
 # Script-local storage instead of /var/lib for better portability
@@ -27,7 +28,7 @@ echo "[+] Destination: $REPORT_FILE"
 echo "[+] Starting Trivy Engine (Estimated time: up to 30 minutes)..."
 
 # Note: We now output JSON so the UI can render it natively.
-sudo trivy fs \
+trivy fs \
   --severity HIGH,CRITICAL \
   --format json \
   --output "$REPORT_FILE" \

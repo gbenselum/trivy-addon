@@ -12,6 +12,21 @@ let absReports = "";
 
 const getEl = (id) => document.getElementById(id);
 
+/**
+ * Escapes HTML special characters to prevent XSS.
+ * @param {string} str - The string to escape.
+ * @returns {string} The escaped string.
+ */
+function escapeHTML(str) {
+    if (!str) return "";
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 function discoverPaths() {
     return cockpit.script("find /usr/share/cockpit ~/.local/share/cockpit -maxdepth 2 -name scan_system.sh -print -quit 2>/dev/null")
         .then(path => {
@@ -94,20 +109,21 @@ function renderDashboard(data) {
                         else counts.UNKNOWN++;
                         if (activeFilter && activeFilter !== sev) return;
                         const fixCmd = getFixCommand(v, dsName);
+                        const safeSevClass = sev.toLowerCase().replace(/[^a-z0-9-]/g, '');
                         html += `
                             <div class="vuln-item">
                                 <div class="vuln-header-row">
                                     <div>
-                                        <span class="vuln-badge badge-${sev.toLowerCase()}">${sev}</span>
-                                        <div class="vuln-pkg">${v.PkgName}</div>
-                                        <div class="vuln-id" style="font-size:11px; color:var(--text-muted); font-family:monospace;">${v.VulnerabilityID}</div>
+                                        <span class="vuln-badge badge-${safeSevClass}">${escapeHTML(sev)}</span>
+                                        <div class="vuln-pkg">${escapeHTML(v.PkgName)}</div>
+                                        <div class="vuln-id" style="font-size:11px; color:var(--text-muted); font-family:monospace;">${escapeHTML(v.VulnerabilityID)}</div>
                                     </div>
-                                    <div style="font-size:12px; color:var(--text-muted)">Installed: ${v.InstalledVersion}</div>
+                                    <div style="font-size:12px; color:var(--text-muted)">Installed: ${escapeHTML(v.InstalledVersion)}</div>
                                 </div>
-                                <div class="vuln-desc-text">${v.Title || 'No description available.'}</div>
+                                <div class="vuln-desc-text">${escapeHTML(v.Title || 'No description available.')}</div>
                                 <div class="remediation-box">
                                     <div class="remediation-label">Remediation / Fix Command</div>
-                                    <div class="remediation-cmd">${fixCmd}</div>
+                                    <div class="remediation-cmd">${escapeHTML(fixCmd)}</div>
                                 </div>
                             </div>
                         `;
@@ -121,7 +137,7 @@ function renderDashboard(data) {
         getEl('count-low').textContent = counts.LOW;
         getEl('count-unknown').textContent = counts.UNKNOWN;
         
-        const typeStr = activeFilter ? ` <b>${activeFilter.toLowerCase()}</b>` : '';
+        const typeStr = activeFilter ? ` <b>${escapeHTML(activeFilter.toLowerCase())}</b>` : '';
         getEl('dashboard-results').innerHTML = html || `<div style="text-align:center; padding:40px; color:#555;">No vulnerabilities${typeStr} found. Perfect!</div>`;
     } catch (e) { console.error("Render crashed:", e); }
 }
@@ -130,7 +146,7 @@ function renderLegacyReport(filename) {
     getEl('empty-state').style.display = 'none';
     getEl('dashboard-summary').style.display = 'none';
     getEl('dashboard-results').style.display = 'block';
-    getEl('dashboard-results').innerHTML = `<div style="padding:40px; text-align:center;"><h3 style="color:#eee;">Legacy Report: ${filename}</h3></div>`;
+    getEl('dashboard-results').innerHTML = `<div style="padding:40px; text-align:center;"><h3 style="color:#eee;">Legacy Report: ${escapeHTML(filename)}</h3></div>`;
 }
 
 function runSystemScan(isFast = false) {
