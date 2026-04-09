@@ -1,0 +1,16 @@
+{
+  "name": "cockpit-trivy-scanner",
+  "version": "1.0.0",
+  "description": "Cockpit addon for Trivy vulnerability scanning",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gabriel/cockpit-trivy-scanner.git"
+  },
+  "author": "Gabriel & Antigravity AI",
+  "license": "LGPL-2.1",
+  "dependencies": {},
+  "devDependencies": {
+    "snyk": "^1.1292.0"
+  }
+}
