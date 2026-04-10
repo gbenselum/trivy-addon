@@ -1,0 +1,8 @@
+{
+  "name": "cockpit-trivy-addon",
+  "version": "3.0.0",
+  "description": "Trivy Security Dashboard for Cockpit",
+  "main": "index.js",
+  "license": "LGPL-2.1",
+  "author": "Gabriel"
+}

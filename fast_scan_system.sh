@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # Trivy Fast Scan - OS Only
 # (c) 2026 Gabriel & Antigravity
 
