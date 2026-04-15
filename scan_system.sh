@@ -28,12 +28,13 @@ echo "[+] Destination: $REPORT_FILE"
 echo "[+] Starting Trivy Engine (Estimated time: up to 30 minutes)..."
 
 # Note: We now output JSON so the UI can render it natively.
+# Optimized skip-dirs for common container/flatpak locations without hardcoded user paths
 trivy fs \
   --severity HIGH,CRITICAL \
   --format json \
   --output "$REPORT_FILE" \
-  --skip-dirs "/home/gabriel/.local/share/flatpak" \
-  --skip-dirs "/home/gabriel/.local/share/ollama" \
+  --skip-dirs "/var/lib/flatpak" \
+  --skip-dirs "/root/.local/share/flatpak" \
   --timeout 30m \
   /
 
