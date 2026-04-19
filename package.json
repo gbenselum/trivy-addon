@@ -4,5 +4,14 @@
   "description": "Trivy Security Dashboard for Cockpit",
   "main": "index.js",
   "license": "LGPL-2.1",
-  "author": "Gabriel"
+  "author": "Gabriel",
+  "devDependencies": {
+    "snyk": "^1.1291.0",
+    "sonarqube-scanner": "^4.2.3"
+  },
+  "scripts": {
+    "snyk:test": "snyk test",
+    "snyk:monitor": "snyk monitor",
+    "sonar": "sonar-scanner"
+  }
 }
