@@ -54,6 +54,11 @@ function updateReportList() {
 
 function showReport(filename) {
     if (!filename || !absReports) return;
+    // Security: Prevent path traversal
+    if (filename.includes('..') || filename.includes('/')) {
+        console.error("Blocked invalid report filename:", filename);
+        return;
+    }
     return cockpit.file(`${absReports}/${filename}`).read()
         .then(content => {
             if (!content) return;
@@ -131,7 +136,7 @@ function renderDashboard(data) {
         getEl('count-low').textContent = counts.LOW;
         getEl('count-unknown').textContent = counts.UNKNOWN;
         
-        const typeStr = activeFilter ? ` <b>${activeFilter.toLowerCase()}</b>` : '';
+        const typeStr = activeFilter ? ` <b>${escapeHTML(activeFilter.toLowerCase())}</b>` : '';
         getEl('dashboard-results').innerHTML = html || `<div style="text-align:center; padding:40px; color:#555;">No vulnerabilities${typeStr} found. Perfect!</div>`;
     } catch (e) { console.error("Render crashed:", e); }
 }
@@ -140,7 +145,7 @@ function renderLegacyReport(filename) {
     getEl('empty-state').style.display = 'none';
     getEl('dashboard-summary').style.display = 'none';
     getEl('dashboard-results').style.display = 'block';
-    getEl('dashboard-results').innerHTML = `<div style="padding:40px; text-align:center;"><h3 style="color:#eee;">Legacy Report: ${filename}</h3></div>`;
+    getEl('dashboard-results').innerHTML = `<div style="padding:40px; text-align:center;"><h3 style="color:#eee;">Legacy Report: ${escapeHTML(filename)}</h3></div>`;
 }
 
 function runSystemScan(isFast = false) {

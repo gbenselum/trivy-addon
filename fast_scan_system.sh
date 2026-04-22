@@ -9,6 +9,12 @@ ABS_PATH=$(dirname "$(realpath "$0")")
 
 mkdir -p "$ABS_PATH/reports"
 
+# Security: Check for Trivy
+if ! command -v trivy &> /dev/null; then
+    echo "[ERROR] Trivy engine not found. Please install it first."
+    exit 1
+fi
+
 echo "[FAST SCAN] Initiating OS-only vulnerability audit..."
 echo "Target: Local Filesystem (/)"
 
