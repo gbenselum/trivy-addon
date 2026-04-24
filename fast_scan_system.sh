@@ -7,6 +7,12 @@ NAME="Trivy Scanner Fast"
 DATE_LOG=$(date +%Y-%m-%d_%H-%M)
 ABS_PATH=$(dirname "$(realpath "$0")")
 
+# --- PRE-FLIGHT ---
+if ! command -v trivy &> /dev/null; then
+    echo "[ERROR] trivy binary not found in PATH"
+    exit 1
+fi
+
 mkdir -p "$ABS_PATH/reports"
 
 echo "[FAST SCAN] Initiating OS-only vulnerability audit..."

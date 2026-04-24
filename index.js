@@ -54,6 +54,11 @@ function updateReportList() {
 
 function showReport(filename) {
     if (!filename || !absReports) return;
+    // Path traversal protection
+    if (filename.includes('..') || filename.includes('/')) {
+        console.error("Invalid filename:", filename);
+        return;
+    }
     return cockpit.file(`${absReports}/${filename}`).read()
         .then(content => {
             if (!content) return;
