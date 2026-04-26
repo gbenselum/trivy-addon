@@ -54,6 +54,11 @@ function updateReportList() {
 
 function showReport(filename) {
     if (!filename || !absReports) return;
+    // Path traversal protection: block filenames with .. or /
+    if (filename.includes('..') || filename.includes('/')) {
+        console.error("Illegal filename access blocked:", filename);
+        return;
+    }
     return cockpit.file(`${absReports}/${filename}`).read()
         .then(content => {
             if (!content) return;
