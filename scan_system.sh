@@ -24,6 +24,12 @@ echo "[+] Base Directory: $SCRIPT_DIR"
 echo "[+] Output Format: JSON"
 echo "[+] Destination: $REPORT_FILE"
 
+# --- PRE-FLIGHT CHECK ---
+if ! command -v trivy &> /dev/null; then
+    echo "[ERROR] Trivy is not installed or not in PATH."
+    exit 1
+fi
+
 # --- SCAN EXECUTION ---
 echo "[+] Starting Trivy Engine (Estimated time: up to 30 minutes)..."
 
@@ -32,8 +38,6 @@ trivy fs \
   --severity HIGH,CRITICAL \
   --format json \
   --output "$REPORT_FILE" \
-  --skip-dirs "/home/gabriel/.local/share/flatpak" \
-  --skip-dirs "/home/gabriel/.local/share/ollama" \
   --timeout 30m \
   /
 
