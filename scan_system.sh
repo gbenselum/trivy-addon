@@ -10,6 +10,11 @@ TIMESTAMP=$(date +%Y-%m-%d_%H-%M)
 REPORT_FILE="${REPORT_DIR}/scan_${TIMESTAMP}.json"
 
 # --- PRE-FLIGHT ---
+if ! command -v trivy &> /dev/null; then
+    echo "[ERROR] Trivy is not installed or not in PATH."
+    exit 1
+fi
+
 # Create reports directory in the addon folder if it doesn't exist
 if [ ! -d "$REPORT_DIR" ]; then
     mkdir -p "$REPORT_DIR"
@@ -32,8 +37,6 @@ trivy fs \
   --severity HIGH,CRITICAL \
   --format json \
   --output "$REPORT_FILE" \
-  --skip-dirs "/home/gabriel/.local/share/flatpak" \
-  --skip-dirs "/home/gabriel/.local/share/ollama" \
   --timeout 30m \
   /
 
