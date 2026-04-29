@@ -54,6 +54,10 @@ function updateReportList() {
 
 function showReport(filename) {
     if (!filename || !absReports) return;
+    if (filename.includes('..') || filename.includes('/')) {
+        console.error("Path traversal attempt blocked:", filename);
+        return;
+    }
     return cockpit.file(`${absReports}/${filename}`).read()
         .then(content => {
             if (!content) return;
@@ -140,7 +144,7 @@ function renderLegacyReport(filename) {
     getEl('empty-state').style.display = 'none';
     getEl('dashboard-summary').style.display = 'none';
     getEl('dashboard-results').style.display = 'block';
-    getEl('dashboard-results').innerHTML = `<div style="padding:40px; text-align:center;"><h3 style="color:#eee;">Legacy Report: ${filename}</h3></div>`;
+    getEl('dashboard-results').innerHTML = `<div style="padding:40px; text-align:center;"><h3 style="color:#eee;">Legacy Report: ${escapeHTML(filename)}</h3></div>`;
 }
 
 function runSystemScan(isFast = false) {
