@@ -7,6 +7,12 @@ NAME="Trivy Scanner Fast"
 DATE_LOG=$(date +%Y-%m-%d_%H-%M)
 ABS_PATH=$(dirname "$(realpath "$0")")
 
+# Verify trivy is installed
+if ! command -v trivy >/dev/null 2>&1; then
+    echo "[ERROR] Trivy binary not found. Please install it before running scans."
+    exit 1
+fi
+
 mkdir -p "$ABS_PATH/reports"
 
 echo "[FAST SCAN] Initiating OS-only vulnerability audit..."
