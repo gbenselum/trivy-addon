@@ -19,6 +19,12 @@ fi
 # Setup logging
 exec > >(tee -a "$LOG_FILE") 2>&1
 
+# --- DEPENDENCY CHECK ---
+if ! command -v trivy &> /dev/null; then
+    echo "[ERROR] trivy binary not found. Please install Trivy before running the scan."
+    exit 1
+fi
+
 echo "--- SCAN STARTED AT $(date) ---"
 echo "[+] Base Directory: $SCRIPT_DIR"
 echo "[+] Output Format: JSON"
