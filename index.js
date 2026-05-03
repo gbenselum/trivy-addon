@@ -54,6 +54,10 @@ function updateReportList() {
 
 function showReport(filename) {
     if (!filename || !absReports) return;
+    if (filename.includes("..") || filename.includes("/")) {
+        console.error("Path traversal attempt blocked:", filename);
+        return;
+    }
     return cockpit.file(`${absReports}/${filename}`).read()
         .then(content => {
             if (!content) return;
