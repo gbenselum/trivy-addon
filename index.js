@@ -53,7 +53,12 @@ function updateReportList() {
 }
 
 function showReport(filename) {
-    if (!filename || !absReports) return;
+    if (!filename || !absReports) return Promise.reject("Invalid parameters");
+    // Path traversal protection
+    if (filename.includes('..') || filename.includes('/')) {
+        console.error("Blocked potential path traversal attempt:", filename);
+        return Promise.reject("Illegal filename");
+    }
     return cockpit.file(`${absReports}/${filename}`).read()
         .then(content => {
             if (!content) return;
