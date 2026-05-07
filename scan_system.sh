@@ -32,8 +32,6 @@ trivy fs \
   --severity HIGH,CRITICAL \
   --format json \
   --output "$REPORT_FILE" \
-  --skip-dirs "/home/gabriel/.local/share/flatpak" \
-  --skip-dirs "/home/gabriel/.local/share/ollama" \
   --timeout 30m \
   /
 
