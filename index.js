@@ -54,6 +54,11 @@ function updateReportList() {
 
 function showReport(filename) {
     if (!filename || !absReports) return;
+    // Path traversal protection
+    if (filename.includes('..') || filename.includes('/')) {
+        console.error("Security alert: Path traversal attempt detected");
+        return Promise.reject(new Error("Invalid filename"));
+    }
     return cockpit.file(`${absReports}/${filename}`).read()
         .then(content => {
             if (!content) return;
@@ -140,7 +145,14 @@ function renderLegacyReport(filename) {
     getEl('empty-state').style.display = 'none';
     getEl('dashboard-summary').style.display = 'none';
     getEl('dashboard-results').style.display = 'block';
-    getEl('dashboard-results').innerHTML = `<div style="padding:40px; text-align:center;"><h3 style="color:#eee;">Legacy Report: ${filename}</h3></div>`;
+    getEl('dashboard-results').innerHTML = '';
+    const container = document.createElement('div');
+    container.style.cssText = 'padding:40px; text-align:center;';
+    const title = document.createElement('h3');
+    title.style.color = '#eee';
+    title.textContent = `Legacy Report: ${filename}`;
+    container.appendChild(title);
+    getEl('dashboard-results').appendChild(container);
 }
 
 function runSystemScan(isFast = false) {
