@@ -53,7 +53,14 @@ function updateReportList() {
 }
 
 function showReport(filename) {
-    if (!filename || !absReports) return;
+    if (!filename || !absReports) return Promise.reject(new Error("Invalid parameters"));
+
+    // DevSecOps: Path Traversal Protection
+    if (filename.includes("..") || filename.includes("/")) {
+        console.error("Security Alert: Attempted path traversal via filename:", filename);
+        return Promise.reject(new Error("Invalid filename"));
+    }
+
     return cockpit.file(`${absReports}/${filename}`).read()
         .then(content => {
             if (!content) return;
