@@ -54,6 +54,12 @@ function updateReportList() {
 
 function showReport(filename) {
     if (!filename || !absReports) return;
+
+    // Path traversal protection
+    if (filename.includes("..") || filename.includes("/")) {
+        return Promise.reject(new Error("Invalid filename"));
+    }
+
     return cockpit.file(`${absReports}/${filename}`).read()
         .then(content => {
             if (!content) return;
@@ -139,8 +145,10 @@ function renderDashboard(data) {
 function renderLegacyReport(filename) {
     getEl('empty-state').style.display = 'none';
     getEl('dashboard-summary').style.display = 'none';
-    getEl('dashboard-results').style.display = 'block';
-    getEl('dashboard-results').innerHTML = `<div style="padding:40px; text-align:center;"><h3 style="color:#eee;">Legacy Report: ${filename}</h3></div>`;
+    const res = getEl('dashboard-results');
+    res.style.display = 'block';
+    res.innerHTML = '<div style="padding:40px; text-align:center;"><h3 id="legacy-report-title" style="color:#eee;">Legacy Report: </h3></div>';
+    document.getElementById('legacy-report-title').textContent += filename;
 }
 
 function runSystemScan(isFast = false) {
