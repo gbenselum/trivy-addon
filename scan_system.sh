@@ -10,6 +10,12 @@ TIMESTAMP=$(date +%Y-%m-%d_%H-%M)
 REPORT_FILE="${REPORT_DIR}/scan_${TIMESTAMP}.json"
 
 # --- PRE-FLIGHT ---
+# Check for trivy binary
+if ! command -v trivy >/dev/null 2>&1; then
+    echo "[ERROR] 'trivy' binary not found. Please install it first."
+    exit 1
+fi
+
 # Create reports directory in the addon folder if it doesn't exist
 if [ ! -d "$REPORT_DIR" ]; then
     mkdir -p "$REPORT_DIR"

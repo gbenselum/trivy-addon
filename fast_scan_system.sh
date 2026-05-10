@@ -9,6 +9,12 @@ ABS_PATH=$(dirname "$(realpath "$0")")
 
 mkdir -p "$ABS_PATH/reports"
 
+# Pre-flight: Check for trivy binary
+if ! command -v trivy >/dev/null 2>&1; then
+    echo "[ERROR] 'trivy' binary not found. Please install it first."
+    exit 1
+fi
+
 echo "[FAST SCAN] Initiating OS-only vulnerability audit..."
 echo "Target: Local Filesystem (/)"
 
