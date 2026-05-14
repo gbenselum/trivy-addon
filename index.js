@@ -54,6 +54,9 @@ function updateReportList() {
 
 function showReport(filename) {
     if (!filename || !absReports) return;
+    if (filename.includes('..') || filename.includes('/')) {
+        return Promise.reject(new Error("Invalid filename"));
+    }
     return cockpit.file(`${absReports}/${filename}`).read()
         .then(content => {
             if (!content) return;

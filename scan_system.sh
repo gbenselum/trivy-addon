@@ -27,13 +27,17 @@ echo "[+] Destination: $REPORT_FILE"
 # --- SCAN EXECUTION ---
 echo "[+] Starting Trivy Engine (Estimated time: up to 30 minutes)..."
 
+# Ensure trivy is installed
+if ! command -v trivy &> /dev/null; then
+    echo "[ERROR] trivy binary not found in PATH."
+    exit 1
+fi
+
 # Note: We now output JSON so the UI can render it natively.
 trivy fs \
   --severity HIGH,CRITICAL \
   --format json \
   --output "$REPORT_FILE" \
-  --skip-dirs "/home/gabriel/.local/share/flatpak" \
-  --skip-dirs "/home/gabriel/.local/share/ollama" \
   --timeout 30m \
   /
 
