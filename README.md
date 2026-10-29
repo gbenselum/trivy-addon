@@ -1,5 +1,5 @@
 # Trivy Security Dashboard for Cockpit
-[![Version](https://img.shields.io/badge/version-3.0-blue.svg)](file:///home/gabriel/.local/share/cockpit/trivy-addon/version3)
+![Version](https://img.shields.io/badge/version-3.0-blue.svg)
 [![Platform](https://img.shields.io/badge/platform-Debian%20/%20Ubuntu-orange.svg)](https://www.debian.org/)
 
 A professional, native security scanner addon for [Cockpit](https://cockpit-project.org/). This tool integrates the powerful **Trivy** vulnerability scanner directly into your server management interface, providing real-time audits, historical reporting, and interactive remediation.
@@ -25,7 +25,7 @@ The addon is designed for **Debian-based** systems (Ubuntu, Pop!_OS, Debian, etc
 Ensure the following packages are installed on your host:
 - **Cockpit**: `sudo apt install cockpit`
 - **JQ**: `sudo apt install jq` (Used for JSON processing)
-- **Trivy**: [Official Installation Guide](https://aquasecurity.github.io/trivy/v0.18.3/getting-started/installation/)
+- **Trivy**: [official installation guide](https://trivy.dev/) (the apt repository below is the current one)
   ```bash
   wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
   echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
@@ -69,4 +69,4 @@ This project is an independent extension of the **[Cockpit Project](https://cock
 ---
 **Maintained by**: Gabriel  
 **Engineered with**: Antigravity AI  
-**License**: [LGPL-2.1](file:///home/gabriel/.local/share/cockpit/trivy-addon/LICENSE)
+**License**: [LGPL-2.1](LICENSE)
